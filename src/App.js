@@ -6,7 +6,9 @@ import Login from './Login';
 function App() {
   const [currentPage, setCurrentPage] = useState('login');
 
-  // Canlı veriyi burada merkezi olarak tutuyoruz
+  // --- 1. DEĞİŞİKLİK: Seçili olayı tutacak state ---
+  const [selectedIncident, setSelectedIncident] = useState(null);
+
   const [liveData, setLiveData] = useState({ temp: 42.0, wind: 18.0 });
 
   useEffect(() => {
@@ -19,6 +21,12 @@ function App() {
     return () => clearInterval(interval);
   }, []);
 
+  // --- 2. DEĞİŞİKLİK: Olay verisini kabul eden fonksiyon ---
+  const handleShowDetails = (incidentData) => {
+    setSelectedIncident(incidentData); // Tıklanan veriyi kaydet
+    setCurrentPage('details');         // Sayfayı değiştir
+  };
+
   return (
     <div className="App">
       {currentPage === 'login' && (
@@ -27,15 +35,16 @@ function App() {
 
       {currentPage === 'dashboard' && (
         <Dashboard
-          onShowDetails={() => setCurrentPage('details')}
-          currentData={liveData} // Canlı veriyi gönderiyoruz
+          onShowDetails={handleShowDetails} // Güncellenmiş fonksiyonu gönder
+          currentData={liveData}
         />
       )}
 
       {currentPage === 'details' && (
         <Details
           onBack={() => setCurrentPage('dashboard')}
-          currentData={liveData} // Aynı canlı veriyi buraya da gönderiyoruz
+          currentData={liveData}
+          incident={selectedIncident} // --- 3. DEĞİŞİKLİK: Veriyi Details'e gönder ---
         />
       )}
     </div>

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const Details = ({ onBack, currentData }) => {
-  // Confidence skorunu hala burada simüle edebiliriz, analizin canlı olduğunu hissettirir
+const Details = ({ onBack, currentData, incident }) => {
   const [analysisConfidence, setAnalysisConfidence] = useState(98.7);
 
   useEffect(() => {
@@ -13,7 +12,6 @@ const Details = ({ onBack, currentData }) => {
 
   return (
     <div style={{ backgroundColor: '#1A1A2E', minHeight: '100vh', color: 'white', padding: '30px' }}>
-      {/* Geri Dön Butonu */}
       <button
         onClick={onBack}
         style={{
@@ -24,23 +22,20 @@ const Details = ({ onBack, currentData }) => {
         ← Back to Map
       </button>
 
-      <h1 style={{ fontSize: '28px', marginBottom: '10px' }}>INCIDENT: SIERRA NEVADA</h1>
-      <p style={{ color: '#f47b25', fontWeight: 'bold' }}>Status: High Severity Alert</p>
+      {/* Başlık: Database'den gelen alarm_id veya id değerini gösterir */}
+      <h1 style={{ fontSize: '28px', marginBottom: '10px' }}>
+        INCIDENT: {incident?.alarm_id || incident?.id || 'UNKNOWN LOCATION'}
+      </h1>
+
+      <p style={{ color: '#f47b25', fontWeight: 'bold' }}>
+        Status: {incident?.severity || 'High'} Severity Alert
+      </p>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '25px', marginTop: '30px' }}>
 
-        {/* Termal Analiz Kartı - Senin istediğin profesyonel placeholder burada */}
-        <div style={{
-          background: '#252836',
-          padding: '20px',
-          borderRadius: '12px',
-          border: '1px solid #493222',
-          height: '350px',
-          display: 'flex',
-          flexDirection: 'column'
-        }}>
+        {/* --- TERMAL ANALİZ KUTUSU --- */}
+        <div style={{ background: '#252836', padding: '20px', borderRadius: '12px', border: '1px solid #493222', height: '350px', display: 'flex', flexDirection: 'column' }}>
           <h3 style={{ fontSize: '14px', color: '#888', marginBottom: '15px' }}>THERMAL ANALYSIS (YOLOv8)</h3>
-
           <div style={{
             flex: 1,
             background: '#1A1A24',
@@ -49,37 +44,34 @@ const Details = ({ onBack, currentData }) => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            textAlign: 'center',
-            padding: '20px'
+            overflow: 'hidden'
           }}>
-            <div>
-              <div style={{ fontSize: '24px', marginBottom: '10px' }}>⚠️</div>
-              <p style={{
-                color: '#666',
-                fontSize: '14px',
-                margin: 0,
-                fontStyle: 'italic',
-                lineHeight: '1.5'
-              }}>
-                There are no available data for thermal analysis. <br/>
-                <span style={{ fontSize: '12px', color: '#444' }}>Waiting for YOLOv8 model stream...</span>
-              </p>
-            </div>
+            {/* Backend'den gelen 'image_path' değerini kontrol ediyoruz */}
+            {incident?.image_path ? (
+              <img
+                src={incident.image_path}
+                alt="Thermal Detection"
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+            ) : (
+              <div style={{ textAlign: 'center', padding: '20px' }}>
+                <div style={{ fontSize: '24px', marginBottom: '10px' }}>⚠️</div>
+                <p style={{ color: '#666', fontSize: '14px', margin: 0, fontStyle: 'italic', lineHeight: '1.5' }}>
+                  There are no available data for thermal analysis. <br/>
+                  <span style={{ fontSize: '12px', color: '#444' }}>Waiting for YOLOv8 model stream...</span>
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Standart Kamera Kartı */}
         <div style={{ background: '#252836', padding: '20px', borderRadius: '12px', border: '1px solid #493222', height: '350px' }}>
           <h3 style={{ fontSize: '14px', color: '#888', marginBottom: '15px' }}>STANDARD CCTV FEED</h3>
-          <div style={{
-            height: '265px', background: '#1A1A24', borderRadius: '8px',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #333'
-          }}>
+          <div style={{ height: '265px', background: '#1A1A24', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #333' }}>
             <p style={{ color: '#555', fontSize: '14px' }}>Video Stream Loading...</p>
           </div>
         </div>
 
-        {/* Veri Paneli */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div style={{ background: '#252836', padding: '25px', borderRadius: '12px', border: '1px solid #493222' }}>
             <h3 style={{ fontSize: '14px', color: '#888', marginBottom: '20px' }}>Environmental Sensors</h3>
@@ -97,11 +89,15 @@ const Details = ({ onBack, currentData }) => {
 
           <div style={{ background: '#252836', padding: '25px', borderRadius: '12px', border: '1px solid #493222' }}>
             <h3 style={{ fontSize: '14px', color: '#888', marginBottom: '10px' }}>Risk Confidence</h3>
-            <p style={{ fontSize: '32px', fontWeight: 'bold', margin: 0, color: '#4ade80' }}>%{analysisConfidence}</p>
+            <p style={{ fontSize: '32px', fontWeight: 'bold', margin: 0, color: '#4ade80' }}>
+               {/* Backend çıktısında 'confidence' ismi kullanıldığı için güncellendi */}
+               {incident?.confidence
+                ? (incident.confidence * 100).toFixed(1) + '%'
+                : analysisConfidence + '%'}
+            </p>
             <p style={{ fontSize: '12px', color: '#555', marginTop: '10px' }}>Model: YOLOv8-Thermal-v2</p>
           </div>
         </div>
-
       </div>
     </div>
   );
